@@ -46,7 +46,7 @@ export default function HomeScreen() {
         router.push("/(tabs)/health");
         break;
       case "contacts":
-        router.push("/(tabs)/more");
+        router.push("/emergency-contacts");
         break;
       case "emergency":
         router.push("/emergency");

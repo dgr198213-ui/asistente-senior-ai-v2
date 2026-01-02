@@ -99,3 +99,35 @@
 - [ ] Optimizar tamaño de archivos de audio
 - [ ] Revisar y mejorar animaciones
 - [ ] Realizar pruebas de usabilidad con usuarios mayores
+
+
+## Funcionalidades Interactivas Faltantes (Reportado por Usuario)
+
+### Formularios
+- [x] Implementar modal/pantalla para agregar nuevo recordatorio
+- [x] Implementar modal/pantalla para agregar medición de presión arterial
+- [x] Implementar modal/pantalla para agregar medición de glucosa
+- [x] Implementar modal/pantalla para agregar medición de peso
+- [x] Implementar modal/pantalla para agregar medición de frecuencia cardíaca
+
+### Pantalla de Configuración
+- [x] Crear pantalla de configuración completa
+- [x] Implementar selector de tamaño de fuente funcional
+- [x] Implementar toggle de modo oscuro/claro
+- [x] Implementar configuración de notificaciones
+- [x] Agregar sección de información personal del usuario
+
+### Contactos de Emergencia
+- [x] Implementar lista de contactos de emergencia
+- [x] Crear formulario para agregar contacto de emergencia
+- [x] Implementar botones de llamada funcionales
+- [x] Agregar opción de editar/eliminar contactos
+
+### Acciones de Botones
+- [x] Conectar botón "Agregar Recordatorio" con formulario
+- [x] Conectar botón "Agregar Medición" con formulario de salud
+- [x] Conectar tarjetas de acceso rápido en pantalla de inicio
+- [x] Conectar botón de configuración en pantalla Más
+- [x] Conectar botón de contactos de emergencia
+- [x] Implementar funcionalidad de marcado/desmarcado de recordatorios
+- [x] Implementar funcionalidad de favoritos en contactos

@@ -1,4 +1,5 @@
 import { ScrollView, Text, View, Pressable, ActivityIndicator } from "react-native";
+import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
@@ -6,6 +7,7 @@ import { useHealth } from "@/hooks/use-health";
 
 export default function HealthScreen() {
   const colors = useColors();
+  const router = useRouter();
   const { getLatestMetric, isLoading } = useHealth();
 
   const bloodPressure = getLatestMetric("blood_pressure");
@@ -55,6 +57,7 @@ export default function HealthScreen() {
           </View>
         </ScrollView>
         <Pressable
+          onPress={() => router.push("/add-health-metric")}
           style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.97 : 1 }] })}
           className="bg-primary rounded-full p-5 items-center mt-6"
         >

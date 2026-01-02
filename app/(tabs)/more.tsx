@@ -15,6 +15,7 @@ export default function MoreScreen() {
         <ScrollView className="flex-1">
           <View className="gap-3">
             <Pressable
+              onPress={() => router.push("/emergency-contacts")}
               style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
               className="bg-surface rounded-2xl p-6 border border-border"
             >
@@ -36,6 +37,7 @@ export default function MoreScreen() {
             </Pressable>
 
             <Pressable
+              onPress={() => router.push("/settings")}
               style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
               className="bg-surface rounded-2xl p-6 border border-border"
             >

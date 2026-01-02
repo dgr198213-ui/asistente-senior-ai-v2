@@ -1,4 +1,5 @@
 import { ScrollView, Text, View, Pressable, Platform, ActivityIndicator } from "react-native";
+import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
@@ -7,6 +8,7 @@ import * as Haptics from "expo-haptics";
 
 export default function RemindersScreen() {
   const colors = useColors();
+  const router = useRouter();
   const { reminders, isLoading, toggleReminder, getPendingCount } = useReminders();
 
   const handleToggle = (id: string) => {
@@ -114,6 +116,7 @@ export default function RemindersScreen() {
         </ScrollView>
 
         <Pressable
+          onPress={() => router.push("/add-reminder")}
           style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.97 : 1 }] })}
           className="bg-primary rounded-full p-5 items-center mt-6"
         >
