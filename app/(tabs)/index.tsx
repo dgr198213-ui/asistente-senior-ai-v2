@@ -1,46 +1,190 @@
-import { ScrollView, Text, View, TouchableOpacity } from "react-native";
+import { ScrollView, Text, View, Pressable, Platform } from "react-native";
+import { useRouter } from "expo-router";
+import * as Haptics from "expo-haptics";
 
 import { ScreenContainer } from "@/components/screen-container";
+import { IconSymbol } from "@/components/ui/icon-symbol";
+import { useColors } from "@/hooks/use-colors";
+import { useState, useEffect } from "react";
+import { useReminders } from "@/hooks/use-reminders";
 
 /**
- * Home Screen - NativeWind Example
- *
- * This template uses NativeWind (Tailwind CSS for React Native).
- * You can use familiar Tailwind classes directly in className props.
- *
- * Key patterns:
- * - Use `className` instead of `style` for most styling
- * - Theme colors: use tokens directly (bg-background, text-foreground, bg-primary, etc.); no dark: prefix needed
- * - Responsive: standard Tailwind breakpoints work on web
- * - Custom colors defined in tailwind.config.js
+ * Home Screen - Pantalla principal del Asistente Senior AI
+ * Muestra saludo personalizado y accesos rápidos a las funciones principales
  */
 export default function HomeScreen() {
+  const colors = useColors();
+  const router = useRouter();
+  const { getPendingCount } = useReminders();
+  const [greeting, setGreeting] = useState("");
+  const [userName] = useState("Usuario"); // TODO: Get from user profile
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) {
+      setGreeting("Buenos días");
+    } else if (hour < 20) {
+      setGreeting("Buenas tardes");
+    } else {
+      setGreeting("Buenas noches");
+    }
+  }, []);
+
+  const handlePress = (action: string) => {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    
+    switch (action) {
+      case "assistant":
+        router.push("/(tabs)/assistant");
+        break;
+      case "reminders":
+        router.push("/(tabs)/reminders");
+        break;
+      case "health":
+        router.push("/(tabs)/health");
+        break;
+      case "contacts":
+        router.push("/(tabs)/more");
+        break;
+      case "emergency":
+        router.push("/emergency");
+        break;
+    }
+  };
+
   return (
     <ScreenContainer className="p-6">
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View className="flex-1 gap-8">
-          {/* Hero Section */}
-          <View className="items-center gap-2">
-            <Text className="text-4xl font-bold text-foreground">Welcome</Text>
-            <Text className="text-base text-muted text-center">
-              Edit app/(tabs)/index.tsx to get started
+      <ScrollView 
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="flex-1 gap-6">
+          {/* Greeting Section */}
+          <View className="gap-2 mt-4">
+            <Text className="text-5xl font-bold text-foreground">
+              {greeting}
+            </Text>
+            <Text className="text-2xl text-muted">
+              {userName}
             </Text>
           </View>
 
-          {/* Example Card */}
-          <View className="w-full max-w-sm self-center bg-surface rounded-2xl p-6 shadow-sm border border-border">
-            <Text className="text-lg font-semibold text-foreground mb-2">NativeWind Ready</Text>
-            <Text className="text-sm text-muted leading-relaxed">
-              Use Tailwind CSS classes directly in your React Native components.
+          {/* Voice Assistant Button */}
+          <Pressable
+            onPress={() => handlePress("assistant")}
+            style={({ pressed }) => ({
+              transform: [{ scale: pressed ? 0.97 : 1 }],
+              opacity: pressed ? 0.9 : 1,
+            })}
+            className="bg-primary rounded-3xl p-8 items-center justify-center shadow-lg"
+          >
+            <IconSymbol size={64} name="mic.fill" color="#ffffff" />
+            <Text className="text-white text-2xl font-bold mt-4">
+              Hablar con Asistente
             </Text>
+            <Text className="text-white/80 text-base mt-2 text-center">
+              Toca para activar el asistente de voz
+            </Text>
+          </Pressable>
+
+          {/* Quick Access Cards */}
+          <View className="gap-4">
+            <Text className="text-xl font-semibold text-foreground">
+              Accesos Rápidos
+            </Text>
+
+            {/* Reminders Card */}
+            <Pressable
+              onPress={() => handlePress("reminders")}
+              style={({ pressed }) => ({
+                opacity: pressed ? 0.7 : 1,
+              })}
+              className="bg-surface rounded-2xl p-6 border border-border"
+            >
+              <View className="flex-row items-center gap-4">
+                <View className="bg-warning/20 rounded-full p-4">
+                  <IconSymbol size={40} name="bell.fill" color={colors.warning} />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-xl font-semibold text-foreground">
+                    Recordatorios
+                  </Text>
+                  <Text className="text-base text-muted mt-1">
+                    {getPendingCount()} pendientes
+                  </Text>
+                </View>
+                <IconSymbol size={24} name="chevron.right" color={colors.muted} />
+              </View>
+            </Pressable>
+
+            {/* Health Card */}
+            <Pressable
+              onPress={() => handlePress("health")}
+              style={({ pressed }) => ({
+                opacity: pressed ? 0.7 : 1,
+              })}
+              className="bg-surface rounded-2xl p-6 border border-border"
+            >
+              <View className="flex-row items-center gap-4">
+                <View className="bg-error/20 rounded-full p-4">
+                  <IconSymbol size={40} name="heart.fill" color={colors.error} />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-xl font-semibold text-foreground">
+                    Salud
+                  </Text>
+                  <Text className="text-base text-muted mt-1">
+                    Registra tus datos
+                  </Text>
+                </View>
+                <IconSymbol size={24} name="chevron.right" color={colors.muted} />
+              </View>
+            </Pressable>
+
+            {/* Contacts Card */}
+            <Pressable
+              onPress={() => handlePress("contacts")}
+              style={({ pressed }) => ({
+                opacity: pressed ? 0.7 : 1,
+              })}
+              className="bg-surface rounded-2xl p-6 border border-border"
+            >
+              <View className="flex-row items-center gap-4">
+                <View className="bg-primary/20 rounded-full p-4">
+                  <IconSymbol size={40} name="phone.fill" color={colors.primary} />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-xl font-semibold text-foreground">
+                    Contactos
+                  </Text>
+                  <Text className="text-base text-muted mt-1">
+                    Llama a tus seres queridos
+                  </Text>
+                </View>
+                <IconSymbol size={24} name="chevron.right" color={colors.muted} />
+              </View>
+            </Pressable>
           </View>
 
-          {/* Example Button */}
-          <View className="items-center">
-            <TouchableOpacity className="bg-primary px-6 py-3 rounded-full active:opacity-80">
-              <Text className="text-background font-semibold">Get Started</Text>
-            </TouchableOpacity>
-          </View>
+          {/* Emergency Button */}
+          <Pressable
+            onPress={() => handlePress("emergency")}
+            style={({ pressed }) => ({
+              transform: [{ scale: pressed ? 0.97 : 1 }],
+              opacity: pressed ? 0.9 : 1,
+            })}
+            className="bg-error rounded-3xl p-6 items-center justify-center shadow-lg mt-2"
+          >
+            <IconSymbol size={48} name="exclamationmark.triangle.fill" color="#ffffff" />
+            <Text className="text-white text-2xl font-bold mt-3">
+              EMERGENCIA
+            </Text>
+            <Text className="text-white/80 text-base mt-1">
+              Toca para obtener ayuda inmediata
+            </Text>
+          </Pressable>
         </View>
       </ScrollView>
     </ScreenContainer>
