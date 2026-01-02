@@ -87,6 +87,12 @@ export default function RootLayout() {
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="oauth/callback" />
+            <Stack.Screen name="add-reminder" options={{ presentation: "modal" }} />
+            <Stack.Screen name="add-health-metric" options={{ presentation: "modal" }} />
+            <Stack.Screen name="add-emergency-contact" options={{ presentation: "modal" }} />
+            <Stack.Screen name="settings" />
+            <Stack.Screen name="emergency-contacts" />
+            <Stack.Screen name="emergency" />
           </Stack>
           <StatusBar style="auto" />
         </QueryClientProvider>

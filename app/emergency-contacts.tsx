@@ -1,4 +1,4 @@
-import { Text, View, Pressable, ScrollView, Platform, ActivityIndicator, Linking } from "react-native";
+import { ScrollView, Text, View, Pressable, Platform, ActivityIndicator, Linking } from "react-native";
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { IconSymbol } from "@/components/ui/icon-symbol";
