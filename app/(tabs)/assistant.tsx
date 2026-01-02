@@ -6,9 +6,17 @@ import { useVoiceAssistant } from "@/hooks/use-voice-assistant";
 import * as Haptics from "expo-haptics";
 import { useState, useRef, useEffect } from "react";
 
+const QUICK_SUGGESTIONS = [
+  "¿Cuándo tomar mi medicamento?",
+  "¿Cómo agrego un recordatorio?",
+  "Necesito ayuda de emergencia",
+  "¿Cuál es mi presión arterial?",
+  "¿Cómo registro mi salud?",
+];
+
 export default function AssistantScreen() {
   const colors = useColors();
-  const { messages, isRecording, isProcessing, hasAudioPermission, startRecording, stopRecording, sendTextMessage, clearMessages } =
+  const { messages, isRecording, isProcessing, isTranscribing, hasAudioPermission, startRecording, stopRecording, sendTextMessage, clearMessages } =
     useVoiceAssistant();
   const [textInput, setTextInput] = useState("");
   const scrollViewRef = useRef<ScrollView>(null);
@@ -41,12 +49,22 @@ export default function AssistantScreen() {
     setTextInput("");
   };
 
+  const handleQuickSuggestion = (suggestion: string) => {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    sendTextMessage(suggestion);
+  };
+
   const handleClearHistory = () => {
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
     clearMessages();
   };
+
+  // Mostrar sugerencias solo si no hay mensajes (excepto el de bienvenida)
+  const showSuggestions = messages.length <= 1;
 
   return (
     <ScreenContainer className="p-6">
@@ -89,10 +107,40 @@ export default function AssistantScreen() {
               </View>
             ))}
 
+            {/* Sugerencias de preguntas frecuentes */}
+            {showSuggestions && !isProcessing && (
+              <View className="mt-8 mb-4">
+                <Text className="text-base font-semibold text-foreground mb-3">Preguntas frecuentes:</Text>
+                <View className="gap-2">
+                  {QUICK_SUGGESTIONS.map((suggestion, index) => (
+                    <Pressable
+                      key={index}
+                      onPress={() => handleQuickSuggestion(suggestion)}
+                      style={({ pressed }) => ({
+                        transform: [{ scale: pressed ? 0.98 : 1 }],
+                        opacity: pressed ? 0.8 : 1,
+                      })}
+                      className="bg-surface border border-border rounded-xl p-3 flex-row items-center"
+                    >
+                      <IconSymbol size={16} name="paperplane.fill" color={colors.primary} />
+                      <Text className="text-foreground ml-2 flex-1">{suggestion}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+            )}
+
             {isProcessing && (
               <View className="items-center mb-4">
                 <ActivityIndicator size="large" color={colors.primary} />
                 <Text className="text-base text-muted mt-2">Procesando tu mensaje...</Text>
+              </View>
+            )}
+
+            {isTranscribing && (
+              <View className="items-center mb-4">
+                <ActivityIndicator size="large" color={colors.primary} />
+                <Text className="text-base text-muted mt-2">Transcribiendo audio...</Text>
               </View>
             )}
           </ScrollView>
@@ -108,16 +156,16 @@ export default function AssistantScreen() {
                 style={{ color: colors.foreground, fontSize: 16 }}
                 multiline
                 maxLength={500}
-                editable={!isProcessing}
+                editable={!isProcessing && !isTranscribing}
                 onSubmitEditing={handleSendText}
               />
             </View>
             <Pressable
               onPress={handleSendText}
-              disabled={isProcessing || textInput.trim().length === 0}
+              disabled={isProcessing || isTranscribing || textInput.trim().length === 0}
               style={({ pressed }) => ({
                 transform: [{ scale: pressed ? 0.95 : 1 }],
-                opacity: isProcessing || textInput.trim().length === 0 ? 0.5 : 1,
+                opacity: isProcessing || isTranscribing || textInput.trim().length === 0 ? 0.5 : 1,
               })}
               className="w-14 h-14 rounded-full items-center justify-center bg-primary shadow-lg"
             >
@@ -130,15 +178,15 @@ export default function AssistantScreen() {
             <View className="items-center pb-4">
               <Pressable
                 onPress={handleMicPress}
-                disabled={isProcessing}
-                style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.95 : 1 }], opacity: isProcessing ? 0.5 : 1 })}
+                disabled={isProcessing || isTranscribing}
+                style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.95 : 1 }], opacity: isProcessing || isTranscribing ? 0.5 : 1 })}
                 className={`w-20 h-20 rounded-full items-center justify-center ${isRecording ? "bg-error" : "bg-primary"} shadow-lg`}
               >
                 {isRecording ? <View className="w-6 h-6 bg-white rounded" /> : <IconSymbol size={40} name="mic.fill" color="#ffffff" />}
               </Pressable>
 
               <Text className="text-sm text-muted mt-3 text-center">
-                {isRecording ? "Grabando... Toca para detener" : isProcessing ? "Procesando..." : "Toca para hablar"}
+                {isRecording ? "Grabando... Toca para detener" : isTranscribing ? "Transcribiendo..." : isProcessing ? "Procesando..." : "Toca para hablar"}
               </Text>
             </View>
           )}

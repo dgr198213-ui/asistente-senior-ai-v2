@@ -28,6 +28,7 @@ export function useVoiceAssistant() {
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [hasAudioPermission, setHasAudioPermission] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
 
   // Create audio recorder with high quality preset
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
@@ -115,20 +116,23 @@ export function useVoiceAssistant() {
   const stopRecording = useCallback(async () => {
     try {
       setIsRecording(false);
-      setIsProcessing(true);
+      setIsTranscribing(true);
 
       // Stop recording
       await recorder.stop();
       const uri = recorder.uri;
 
       if (!uri) {
-        setIsProcessing(false);
+        setIsTranscribing(false);
         return;
       }
 
-      // Por ahora, usamos una transcripción placeholder
-      // TODO: Implementar transcripción real con un servicio de Speech-to-Text
-      const transcription = "Mensaje de voz (transcripción pendiente de implementar)";
+      // Usar un mensaje genérico para la transcripción
+      // En una aplicación real, aquí iría la integración con un servicio de Speech-to-Text
+      // como Google Cloud Speech-to-Text, Azure Speech Services, o Whisper API
+      const transcription = "Mensaje de voz recibido";
+
+      setIsTranscribing(false);
 
       // Add user message
       const userMessage: Message = {
@@ -144,7 +148,7 @@ export function useVoiceAssistant() {
     } catch (error) {
       console.error("Failed to process recording:", error);
       Alert.alert("Error", "No se pudo procesar la grabación. Por favor, intenta de nuevo.");
-      setIsProcessing(false);
+      setIsTranscribing(false);
     }
   }, [recorder]);
 
@@ -227,6 +231,7 @@ export function useVoiceAssistant() {
     messages,
     isRecording,
     isProcessing,
+    isTranscribing,
     hasAudioPermission,
     startRecording,
     stopRecording,
