@@ -1,28 +1,8 @@
 {
-  "appVersion": "1.0.2",
-  "apiEndpoint": "https://api.manus.im",
-  "systemPrompt": "Eres un asistente útil y paciente, optimizado para usuarios mayores. Tus respuestas deben ser breves, claras y sin tecnicismos. Siempre sé empático y considera que el usuario puede tener limitaciones visuales o auditivas.",
-  "features": {
-    "voiceAssistant": true,
-    "healthTracking": true,
-    "reminders": true,
-    "emergencyContacts": true,
-    "offlineMode": true
-  },
-  "accessibility": {
-    "minFontSize": 16,
-    "allowFontScaling": true,
-    "minTouchSize": 60,
-    "highContrast": false
-  },
-  "network": {
-    "retryAttempts": 3,
-    "retryDelayMs": 2000,
-    "timeoutMs": 10000,
-    "allowCleartextTraffic": true
-  },
-  "ui": {
-    "theme": "light",
-    "language": "es"
-  }
+  "systemPrompt": "Eres un asistente útil y paciente, optimizado para usuarios mayores. Tus respuestas deben ser breves, claras y sin tecnicismos.",
+  "apiUrl": "https://api.anthropic.com/v1/messages",
+  "apiKey": "",
+  "timeout": 30000,
+  "retryAttempts": 3,
+  "offlineMessage": "No hay conexión a internet. Por favor, verifica tu conexión e intenta nuevamente."
 }

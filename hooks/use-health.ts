@@ -10,6 +10,7 @@ export type HealthMetric = {
   date: string;
   time: string;
   notes?: string;
+  recordedAt?: string;
 };
 
 const HEALTH_STORAGE_KEY = "@asistente_senior_health";
@@ -48,6 +49,7 @@ export function useHealth() {
       const newMetric: HealthMetric = {
         ...metric,
         id: Date.now().toString(),
+        recordedAt: new Date().toISOString(),
       };
       const updated = [newMetric, ...metrics];
       await saveMetrics(updated);

@@ -35,7 +35,7 @@ export class FallDetector {
 
   private setupAccelerometer() {
     Accelerometer.setUpdateInterval(SENSOR_CONFIG.accelerometer.updateInterval);
-    Accelerometer.addListener(({ x, y, z }) => {
+    Accelerometer.addListener(({ x, y, z }: { x: number; y: number; z: number }) => {
       const magnitude = Math.sqrt(x * x + y * y + z * z);
       this.accelerometerData.push(magnitude);
 

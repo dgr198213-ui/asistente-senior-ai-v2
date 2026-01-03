@@ -61,10 +61,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="wellness"
+        name="emergency-enhanced"
         options={{
-          title: "Bienestar",
-          tabBarIcon: ({ color }) => <IconSymbol size={32} name="star.fill" color={color} />,
+          title: "Emergencia",
+          tabBarIcon: ({ color }) => <IconSymbol size={32} name="exclamationmark.triangle.fill" color={color} />,
         }}
       />
       <Tabs.Screen

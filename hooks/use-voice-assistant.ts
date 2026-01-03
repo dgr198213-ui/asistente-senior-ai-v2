@@ -3,7 +3,7 @@ import { Platform, Alert } from "react-native";
 import { useAudioRecorder, RecordingPresets } from "expo-audio";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Audio } from "expo-av";
-import { trpc } from "@/lib/trpc";
+import { sendMessageToAI } from '../lib/ai-service';
 
 export type Message = {
   id: string;
@@ -32,9 +32,6 @@ export function useVoiceAssistant() {
 
   // Create audio recorder with high quality preset
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
-
-  // tRPC mutation para enviar mensajes
-  const sendMessageMutation = trpc.chat.sendMessage.useMutation();
 
   // Solicitar permisos de audio al montar el componente
   useEffect(() => {
@@ -128,20 +125,9 @@ export function useVoiceAssistant() {
       }
 
       // Usar un mensaje genérico para la transcripción
-      // En una aplicación real, aquí iría la integración con un servicio de Speech-to-Text
-      // como Google Cloud Speech-to-Text, Azure Speech Services, o Whisper API
       const transcription = "Mensaje de voz recibido";
 
       setIsTranscribing(false);
-
-      // Add user message
-      const userMessage: Message = {
-        id: Date.now().toString(),
-        role: "user",
-        content: transcription,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, userMessage]);
 
       // Enviar mensaje al servidor
       await sendTextMessage(transcription);
@@ -156,42 +142,39 @@ export function useVoiceAssistant() {
     async (text: string) => {
       setIsProcessing(true);
 
-      // Add user message si no se agregó antes
-      const existingMessage = messages.find(
-        (m) => m.content === text && m.role === "user" && Date.now() - m.timestamp.getTime() < 1000
-      );
-
-      if (!existingMessage) {
-        const userMessage: Message = {
-          id: Date.now().toString(),
-          role: "user",
-          content: text,
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, userMessage]);
-      }
+      // Add user message
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        role: "user",
+        content: text,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, userMessage]);
 
       try {
-        // Preparar historial de conversación para contexto
-        const conversationHistory = messages.slice(-10).map((msg) => ({
-          role: msg.role,
-          content: msg.content,
-        }));
+        // Obtener API key desde AsyncStorage
+        const apiKey = await AsyncStorage.getItem('@asistente_senior_api_key') || '';
+        
+        if (!apiKey) {
+          throw new Error('API key no configurada. Ve a Configuración para agregarla.');
+        }
 
-        // Llamar al servidor
-        const response = await sendMessageMutation.mutateAsync({
-          message: text,
-          conversationHistory,
-        });
+        // Llamar al servicio de IA
+        const result = await sendMessageToAI(text, apiKey);
+        
+        if (result.error) {
+          throw new Error(result.error);
+        }
 
         // Add assistant message
         const assistantMessage: Message = {
           id: (Date.now() + 1).toString(),
           role: "assistant",
-          content: response.message,
+          content: result.response,
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, assistantMessage]);
+
       } catch (error) {
         console.error("Failed to get AI response:", error);
         
@@ -199,15 +182,19 @@ export function useVoiceAssistant() {
         const errorMessage: Message = {
           id: (Date.now() + 1).toString(),
           role: "assistant",
-          content: "Lo siento, tuve un problema al procesar tu mensaje. Por favor, intenta de nuevo.",
+          content: error instanceof Error ? error.message : "Lo siento, tuve un problema al procesar tu mensaje. Por favor, intenta de nuevo.",
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, errorMessage]);
+        
+        if (error instanceof Error && error.message.includes('API key no configurada')) {
+          Alert.alert('Configuración Necesaria', error.message);
+        }
+      } finally {
+        setIsProcessing(false);
       }
-
-      setIsProcessing(false);
     },
-    [messages, sendMessageMutation]
+    [messages]
   );
 
   const clearMessages = useCallback(async () => {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Text, View, Pressable, ScrollView, Platform, Switch } from "react-native";
+import { Text, View, Pressable, ScrollView, Platform, Switch, TextInput } from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ScreenContainer } from "@/components/screen-container";
@@ -10,6 +10,7 @@ import * as Haptics from "expo-haptics";
 type FontSize = "small" | "medium" | "large" | "xlarge";
 
 const SETTINGS_STORAGE_KEY = "@asistente_senior_settings";
+const API_KEY_STORAGE_KEY = "@asistente_senior_api_key";
 
 export default function SettingsScreen() {
   const colors = useColors();
@@ -19,6 +20,7 @@ export default function SettingsScreen() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [hapticsEnabled, setHapticsEnabled] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
+  const [apiKey, setApiKey] = useState("");
 
   // Load settings on mount
   useEffect(() => {
@@ -34,6 +36,11 @@ export default function SettingsScreen() {
         setNotificationsEnabled(settings.notificationsEnabled ?? true);
         setHapticsEnabled(settings.hapticsEnabled ?? true);
         setDarkMode(settings.darkMode ?? false);
+      }
+      
+      const storedApiKey = await AsyncStorage.getItem(API_KEY_STORAGE_KEY);
+      if (storedApiKey) {
+        setApiKey(storedApiKey);
       }
     } catch (error) {
       console.error("Failed to load settings:", error);
@@ -73,6 +80,15 @@ export default function SettingsScreen() {
     }
   };
 
+  const handleApiKeyChange = async (text: string) => {
+    setApiKey(text);
+    try {
+      await AsyncStorage.setItem(API_KEY_STORAGE_KEY, text);
+    } catch (error) {
+      console.error("Failed to save API key:", error);
+    }
+  };
+
   const fontSizes: { value: FontSize; label: string; example: string }[] = [
     { value: "small", label: "Pequeño", example: "Aa" },
     { value: "medium", label: "Mediano", example: "Aa" },
@@ -80,12 +96,25 @@ export default function SettingsScreen() {
     { value: "xlarge", label: "Muy Grande", example: "Aa" },
   ];
 
+  // Determinar el tamaño numérico para el estilo inline si es necesario
+  const getFontSizeValue = () => {
+    switch (fontSize) {
+      case "small": return 16;
+      case "medium": return 20;
+      case "large": return 24;
+      case "xlarge": return 28;
+      default: return 20;
+    }
+  };
+
+  const currentFontSize = getFontSizeValue();
+
   return (
     <ScreenContainer edges={["top", "bottom", "left", "right"]} className="p-6">
       <View className="flex-1">
         {/* Header */}
         <View className="flex-row items-center mb-6">
-          <Pressable onPress={() => router.back()} className="p-2 mr-3">
+          <Pressable onPress={() => router.push("/(tabs)/more")} className="p-2 mr-3">
             <IconSymbol size={28} name="chevron.left" color={colors.foreground} />
           </Pressable>
           <Text className="text-3xl font-bold text-foreground">Configuración</Text>
@@ -122,6 +151,33 @@ export default function SettingsScreen() {
                   </Text>
                 </Pressable>
               ))}
+            </View>
+          </View>
+
+          {/* API Key Section */}
+          <View className="mb-8">
+            <Text className="text-xl font-semibold text-foreground mb-4">Conectividad IA</Text>
+            <View className="bg-surface rounded-2xl p-5 border border-border">
+              <Text 
+                className="text-xl font-semibold text-foreground mb-2"
+                style={{ fontSize: currentFontSize }}
+              >
+                API Key de Claude
+              </Text>
+              <TextInput
+                className="border border-border rounded-xl p-4 mt-2 text-foreground bg-background"
+                style={{ fontSize: currentFontSize * 0.8 }}
+                placeholder="sk-ant-api03-..."
+                placeholderTextColor={colors.muted}
+                secureTextEntry
+                value={apiKey}
+                onChangeText={handleApiKeyChange}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              <Text className="text-sm text-muted mt-3">
+                Esta clave permite que el asistente de voz responda usando la inteligencia de Claude.
+              </Text>
             </View>
           </View>
 
@@ -193,7 +249,7 @@ export default function SettingsScreen() {
             <Text className="text-xl font-semibold text-foreground mb-4">Acerca de</Text>
             <View className="bg-surface rounded-2xl p-5 border border-border">
               <Text className="text-lg font-semibold text-foreground mb-2">Asistente Senior AI</Text>
-              <Text className="text-base text-muted">Versión 1.0.0</Text>
+              <Text className="text-base text-muted">Versión 1.0.2</Text>
               <Text className="text-base text-muted mt-3">
                 Tu compañero inteligente para el cuidado de la salud y bienestar.
               </Text>

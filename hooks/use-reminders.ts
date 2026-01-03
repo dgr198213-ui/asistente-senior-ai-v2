@@ -13,6 +13,7 @@ export type Reminder = {
   completed: boolean;
   repeat?: "daily" | "weekly" | "none";
   notificationId?: string;
+  completedAt?: string;
 };
 
 const REMINDERS_STORAGE_KEY = "@asistente_senior_reminders";
@@ -147,7 +148,7 @@ export function useReminders() {
 
       const updated = reminders.map((r) => {
         if (r.id === id) {
-          return { ...r, completed: !r.completed };
+          return { ...r, completed: !r.completed, completedAt: !r.completed ? new Date().toISOString() : undefined };
         }
         return r;
       });

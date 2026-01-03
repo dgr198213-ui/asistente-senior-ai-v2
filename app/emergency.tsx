@@ -18,8 +18,8 @@ export default function EmergencyScreen() {
     <ScreenContainer edges={["top", "bottom", "left", "right"]} className="p-6 bg-error/5">
       <View className="flex-1 justify-between">
         <View>
-          <Pressable onPress={() => router.back()} className="mb-6">
-            <Text className="text-xl text-foreground">← Volver</Text>
+          <Pressable onPress={() => router.push("/(tabs)")} className="mb-6">
+            <Text className="text-xl text-foreground">← Volver al Inicio</Text>
           </Pressable>
           <Text className="text-4xl font-bold text-error mb-4">EMERGENCIA</Text>
           <Text className="text-xl text-foreground">Presiona el botón para llamar al 911</Text>

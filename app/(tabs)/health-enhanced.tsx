@@ -5,7 +5,7 @@ import { useColors } from "@/hooks/use-colors";
 import * as Haptics from "expo-haptics";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { HealthKitService } from "@/lib/health-kit-service";
+import { getHealthKitData } from "@/lib/health-kit-service";
 
 interface HealthMeasurement {
   id: string;
@@ -43,8 +43,7 @@ export default function HealthEnhancedScreen() {
     
     setIsLoadingHealthKit(true);
     try {
-      const healthKit = new HealthKitService();
-      const data = await healthKit.getHealthData();
+      const data = await getHealthKitData();
       setHealthKitData(data);
     } catch (error) {
       console.log("HealthKit no disponible o sin permiso");
@@ -230,7 +229,7 @@ export default function HealthEnhancedScreen() {
                   >
                     <View className="flex-1">
                       <View className="flex-row items-center gap-2 mb-2">
-                        <IconSymbol size={20} name={typeInfo?.icon as any} color={typeInfo?.color} />
+                        <IconSymbol size={20} name={typeInfo?.icon as any} color={typeInfo?.color || colors.primary} />
                         <Text className="font-semibold text-foreground">{typeInfo?.label}</Text>
                         <View 
                           className="px-2 py-1 rounded-full"

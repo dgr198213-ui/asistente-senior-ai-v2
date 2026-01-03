@@ -128,22 +128,30 @@ asistente-senior-app/
 
 ## 🔌 Configuración de API
 
-### Configuración Remota
-La app intenta descargar configuración remota al iniciar. Si no hay conexión, usa `default_config.json` como fallback.
+### Obtener API Key de Claude
 
-**Archivo**: `assets/default_config.json`
-```json
-{
-  "systemPrompt": "Eres un asistente útil y paciente, optimizado para usuarios mayores. Tus respuestas deben ser breves, claras y sin tecnicismos.",
-  "apiUrl": "http://localhost:3000",
-  "timeout": 10000,
-  "retryAttempts": 3
-}
-```
+1. Ve a https://console.anthropic.com
+2. Crea una cuenta o inicia sesión
+3. Ve a "API Keys"
+4. Crea una nueva clave
+5. Cópiala (empieza con `sk-ant-api03-...`)
 
-### Endpoints Esperados
-- `GET /api/config` - Obtener configuración remota
-- `POST /api/chat` - Enviar mensaje al asistente
+### Configurar en la App
+
+1. Abre la app
+2. Ve a "Más" > "Configuración"
+3. Desplázate hasta "API Key de Claude"
+4. Pega tu clave
+5. Guarda
+
+**IMPORTANTE:** La API Key se guarda localmente en tu dispositivo de forma segura.
+
+### Costos
+
+- Cada conversación consume tokens
+- Claude Sonnet 4: ~$3 por millón de tokens
+- Uso típico: ~500 tokens por conversación
+- Costo aproximado: $0.0015 por conversación
 
 ## 🛠️ Desarrollo
 

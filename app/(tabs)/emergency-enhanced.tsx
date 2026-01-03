@@ -2,8 +2,9 @@ import { ScrollView, Text, View, Pressable, Platform, Alert, Linking } from "rea
 import { ScreenContainer } from "@/components/screen-container";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
+import { useEmergencyContacts } from "@/hooks/use-emergency-contacts";
 import * as Haptics from "expo-haptics";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Accelerometer } from "expo-sensors";
 
@@ -20,28 +21,13 @@ export default function EmergencyEnhancedScreen() {
   const [countdownActive, setCountdownActive] = useState(false);
   const [countdown, setCountdown] = useState(10);
   const [fallDetected, setFallDetected] = useState(false);
-  const [emergencyContacts, setEmergencyContacts] = useState<EmergencyContact[]>([
-    {
-      id: "1",
-      name: "Hijo/a",
-      phone: "+1234567890",
-      relationship: "Familiar",
-      isFavorite: true,
-    },
-    {
-      id: "2",
-      name: "Médico",
-      phone: "+0987654321",
-      relationship: "Médico",
-      isFavorite: false,
-    },
-  ]);
+  const { contacts: emergencyContacts, toggleFavorite } = useEmergencyContacts();
 
   // Monitorear acelerómetro para detectar caídas
   useEffect(() => {
     if (Platform.OS === "web") return;
 
-    const subscription = Accelerometer.addListener(({ x, y, z }) => {
+    const subscription = Accelerometer.addListener(({ x, y, z }: { x: number; y: number; z: number }) => {
       // Detectar movimiento brusco (caída)
       const magnitude = Math.sqrt(x * x + y * y + z * z);
       
@@ -137,14 +123,11 @@ export default function EmergencyEnhancedScreen() {
     Linking.openURL(`tel:${phone}`);
   };
 
-  const toggleFavorite = (id: string) => {
-    setEmergencyContacts(
-      emergencyContacts.map(contact =>
-        contact.id === id
-          ? { ...contact, isFavorite: !contact.isFavorite }
-          : { ...contact, isFavorite: false }
-      )
-    );
+  const handleToggleFavorite = (id: string) => {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    toggleFavorite(id);
   };
 
   return (
@@ -256,7 +239,7 @@ export default function EmergencyEnhancedScreen() {
 
                     {/* Botón Favorito */}
                     <Pressable
-                      onPress={() => toggleFavorite(contact.id)}
+                      onPress={() => handleToggleFavorite(contact.id)}
                       style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
                       className={cn(
                         "rounded-full p-3",

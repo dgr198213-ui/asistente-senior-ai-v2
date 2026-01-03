@@ -41,7 +41,7 @@ export default function EmergencyContactsScreen() {
       <View className="flex-1">
         {/* Header */}
         <View className="flex-row items-center mb-6">
-          <Pressable onPress={() => router.back()} className="p-2 mr-3">
+          <Pressable onPress={() => router.push("/(tabs)/more")} className="p-2 mr-3">
             <IconSymbol size={28} name="chevron.left" color={colors.foreground} />
           </Pressable>
           <Text className="text-3xl font-bold text-foreground">Contactos de Emergencia</Text>

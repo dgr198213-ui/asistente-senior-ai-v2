@@ -51,7 +51,7 @@ export default function AddHealthMetricScreen() {
       <View className="flex-1">
         {/* Header */}
         <View className="flex-row items-center justify-between mb-6">
-          <Pressable onPress={() => router.back()} className="p-2">
+          <Pressable onPress={() => router.push("/(tabs)/health")} className="p-2">
             <Text className="text-xl text-primary">Cancelar</Text>
           </Pressable>
           <Text className="text-2xl font-bold text-foreground">Nueva Medición</Text>

@@ -22,7 +22,7 @@ export default function WellnessScreen() {
   const loadWellnessData = async () => {
     try {
       const reminders = JSON.parse((await AsyncStorage.getItem("@asistente_senior_reminders")) || "[]");
-      const healthMetrics = JSON.parse((await AsyncStorage.getItem("@asistente_senior_health_metrics")) || "[]");
+      const healthMetrics = JSON.parse((await AsyncStorage.getItem("@asistente_senior_health")) || "[]");
 
       const completedReminders = reminders
         .filter((r: any) => r.completed)

@@ -31,10 +31,11 @@ export default function AssistantEnhancedScreen() {
     stopRecording, 
     sendTextMessage, 
     clearMessages,
-    sentimentAnalysis 
   } = useVoiceAssistant();
   
-  const { processVoiceInput, isListeningForCommands } = useVoiceNavigation();
+  const { processVoiceInput } = useVoiceNavigation();
+  const isListeningForCommands = false;
+  const sentimentAnalysis = null;
   
   const [textInput, setTextInput] = useState("");
   const [showSentimentAlert, setShowSentimentAlert] = useState(false);
@@ -47,21 +48,8 @@ export default function AssistantEnhancedScreen() {
 
   // Monitorear análisis de sentimiento
   useEffect(() => {
-    if (sentimentAnalysis?.requiresAlert && sentimentAnalysis.sentiment === "distressed") {
-      setShowSentimentAlert(true);
-      // Mostrar alerta después de 2 segundos
-      setTimeout(() => {
-        Alert.alert(
-          "Nos preocupamos por ti",
-          "Detectamos que podrías estar pasando por un momento difícil. ¿Te gustaría hacer un ejercicio de respiración?",
-          [
-            { text: "Sí, ayúdame", onPress: () => sendTextMessage("Ejercicio de respiración") },
-            { text: "Estoy bien", onPress: () => setShowSentimentAlert(false) }
-          ]
-        );
-      }, 1000);
-    }
-  }, [sentimentAnalysis]);
+    // Funcionalidad de análisis de sentimiento desactivada temporalmente
+  }, []);
 
   const handleMicPress = () => {
     if (Platform.OS !== "web") {
@@ -122,20 +110,7 @@ export default function AssistantEnhancedScreen() {
   // Mostrar sugerencias solo si no hay mensajes (excepto el de bienvenida)
   const showSuggestions = messages.length <= 1;
 
-  // Indicador de sentimiento
-  const getSentimentColor = () => {
-    if (!sentimentAnalysis) return colors.muted;
-    switch (sentimentAnalysis.sentiment) {
-      case "distressed":
-        return colors.error;
-      case "negative":
-        return colors.warning;
-      case "positive":
-        return colors.success;
-      default:
-        return colors.muted;
-    }
-  };
+
 
   return (
     <ScreenContainer className="p-6">
@@ -162,29 +137,7 @@ export default function AssistantEnhancedScreen() {
             </Pressable>
           </View>
 
-          {/* Indicador de Sentimiento */}
-          {sentimentAnalysis && (
-            <View 
-              className={cn(
-                "mb-4 p-3 rounded-lg flex-row items-center gap-2",
-                sentimentAnalysis.sentiment === "distressed" && "bg-red-100",
-                sentimentAnalysis.sentiment === "negative" && "bg-yellow-100",
-                sentimentAnalysis.sentiment === "positive" && "bg-green-100",
-                sentimentAnalysis.sentiment === "neutral" && "bg-gray-100"
-              )}
-            >
-              <View 
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: getSentimentColor() }}
-              />
-              <Text className="text-sm font-medium text-foreground flex-1">
-                {sentimentAnalysis.sentiment === "distressed" && "Pareces estar pasando por un momento difícil"}
-                {sentimentAnalysis.sentiment === "negative" && "Detectamos algo negativo en tu mensaje"}
-                {sentimentAnalysis.sentiment === "positive" && "¡Qué bueno escucharte así!"}
-                {sentimentAnalysis.sentiment === "neutral" && "Conversación normal"}
-              </Text>
-            </View>
-          )}
+
 
           {/* Mensajes */}
           <ScrollView 

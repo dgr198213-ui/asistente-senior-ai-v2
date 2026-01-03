@@ -26,7 +26,7 @@ export default function MoreScreen() {
             </Pressable>
 
             <Pressable
-              onPress={() => router.push("/emergency")}
+              onPress={() => router.push("/(tabs)/emergency-enhanced")}
               style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
               className="bg-error/10 rounded-2xl p-6 border border-error"
             >

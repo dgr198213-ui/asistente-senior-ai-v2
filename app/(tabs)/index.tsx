@@ -50,7 +50,7 @@ export default function HomeScreen() {
         router.push("/emergency-contacts");
         break;
       case "emergency":
-        router.push("/emergency");
+        router.push("/(tabs)/emergency-enhanced");
         break;
     }
   };
