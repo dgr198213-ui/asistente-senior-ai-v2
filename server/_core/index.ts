@@ -30,12 +30,17 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
 
-  // Enable CORS for all routes - reflect the request origin to support credentials
+  // Enable CORS for all routes
   app.use((req, res, next) => {
     const origin = req.headers.origin;
+    // En producción, podrías querer restringir esto a tu dominio específico
+    // Para una APK, a veces el origen es nulo o específico de la plataforma
     if (origin) {
       res.header("Access-Control-Allow-Origin", origin);
+    } else {
+      res.header("Access-Control-Allow-Origin", "*");
     }
+    
     res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     res.header(
       "Access-Control-Allow-Headers",

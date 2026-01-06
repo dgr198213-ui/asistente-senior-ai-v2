@@ -3,7 +3,8 @@ import { Platform, Alert } from "react-native";
 import { useAudioRecorder, RecordingPresets } from "expo-audio";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Audio } from "expo-av";
-import { sendMessageToAI } from '../lib/ai-service';
+import * as FileSystem from 'expo-file-system';
+import { trpc } from '../lib/trpc';
 
 export type Message = {
   id: string;
@@ -32,6 +33,9 @@ export function useVoiceAssistant() {
 
   // Create audio recorder with high quality preset
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  
+  // tRPC mutation
+  const voiceMessageMutation = trpc.ai.voiceMessage.useMutation();
 
   // Solicitar permisos de audio al montar el componente
   useEffect(() => {
@@ -114,6 +118,7 @@ export function useVoiceAssistant() {
     try {
       setIsRecording(false);
       setIsTranscribing(true);
+      setIsProcessing(true);
 
       // Stop recording
       await recorder.stop();
@@ -121,22 +126,48 @@ export function useVoiceAssistant() {
 
       if (!uri) {
         setIsTranscribing(false);
+        setIsProcessing(false);
         return;
       }
 
-      // Usar un mensaje genérico para la transcripción
-      const transcription = "Mensaje de voz recibido";
+      // 1. Leer el archivo y convertirlo a base64
+      const base64Audio = await FileSystem.readAsStringAsync(uri, {
+        encoding: 'base64',
+      });
+
+      // 2. Llamar a tRPC
+      const result = await voiceMessageMutation.mutateAsync({
+        audioBase64: base64Audio,
+        mimeType: Platform.OS === 'ios' ? 'audio/m4a' : 'audio/3gp', // Ajustar según plataforma
+      });
 
       setIsTranscribing(false);
 
-      // Enviar mensaje al servidor
-      await sendTextMessage(transcription);
+      // 3. Añadir mensajes a la UI
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        role: "user",
+        content: result.transcription,
+        timestamp: new Date(),
+      };
+      
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: result.response,
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, userMessage, assistantMessage]);
+
     } catch (error) {
       console.error("Failed to process recording:", error);
       Alert.alert("Error", "No se pudo procesar la grabación. Por favor, intenta de nuevo.");
       setIsTranscribing(false);
+    } finally {
+      setIsProcessing(false);
     }
-  }, [recorder]);
+  }, [recorder, voiceMessageMutation]);
 
   const sendTextMessage = useCallback(
     async (text: string) => {
@@ -152,25 +183,12 @@ export function useVoiceAssistant() {
       setMessages((prev) => [...prev, userMessage]);
 
       try {
-        // Obtener API key desde AsyncStorage
-        const apiKey = await AsyncStorage.getItem('@asistente_senior_api_key') || '';
-        
-        if (!apiKey) {
-          throw new Error('API key no configurada. Ve a Configuración para agregarla.');
-        }
-
-        // Llamar al servicio de IA
-        const result = await sendMessageToAI(text, apiKey);
-        
-        if (result.error) {
-          throw new Error(result.error);
-        }
-
-        // Add assistant message
+        // En el futuro, podrías añadir un endpoint tRPC para mensajes de texto simples
+        // Por ahora, simulamos una respuesta o podrías usar el mismo aiRouter si lo adaptas
         const assistantMessage: Message = {
           id: (Date.now() + 1).toString(),
           role: "assistant",
-          content: result.response,
+          content: "He recibido tu mensaje de texto. Por ahora estoy optimizado para mensajes de voz, ¡pruébalo!",
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, assistantMessage]);
@@ -178,23 +196,18 @@ export function useVoiceAssistant() {
       } catch (error) {
         console.error("Failed to get AI response:", error);
         
-        // Mensaje de error amigable
         const errorMessage: Message = {
           id: (Date.now() + 1).toString(),
           role: "assistant",
-          content: error instanceof Error ? error.message : "Lo siento, tuve un problema al procesar tu mensaje. Por favor, intenta de nuevo.",
+          content: "Lo siento, tuve un problema al procesar tu mensaje.",
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, errorMessage]);
-        
-        if (error instanceof Error && error.message.includes('API key no configurada')) {
-          Alert.alert('Configuración Necesaria', error.message);
-        }
       } finally {
         setIsProcessing(false);
       }
     },
-    [messages]
+    []
   );
 
   const clearMessages = useCallback(async () => {

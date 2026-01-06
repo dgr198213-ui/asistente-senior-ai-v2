@@ -154,29 +154,21 @@ export default function SettingsScreen() {
             </View>
           </View>
 
-          {/* API Key Section */}
+          {/* AI Status Section */}
           <View className="mb-8">
             <Text className="text-xl font-semibold text-foreground mb-4">Conectividad IA</Text>
             <View className="bg-surface rounded-2xl p-5 border border-border">
-              <Text 
-                className="text-xl font-semibold text-foreground mb-2"
-                style={{ fontSize: currentFontSize }}
-              >
-                API Key de Claude
-              </Text>
-              <TextInput
-                className="border border-border rounded-xl p-4 mt-2 text-foreground bg-background"
-                style={{ fontSize: currentFontSize * 0.8 }}
-                placeholder="sk-ant-api03-..."
-                placeholderTextColor={colors.muted}
-                secureTextEntry
-                value={apiKey}
-                onChangeText={handleApiKeyChange}
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
+              <View className="flex-row items-center justify-between">
+                <View className="flex-1 mr-4">
+                  <Text className="text-xl font-semibold text-foreground">Estado del Servicio</Text>
+                  <Text className="text-base text-success mt-1">
+                    Conectado al servidor central
+                  </Text>
+                </View>
+                <IconSymbol size={24} name="checkmark.circle.fill" color={colors.primary} />
+              </View>
               <Text className="text-sm text-muted mt-3">
-                Esta clave permite que el asistente de voz responda usando la inteligencia de Claude.
+                El asistente de voz está listo para ayudarte usando la inteligencia de Claude en la nube.
               </Text>
             </View>
           </View>
