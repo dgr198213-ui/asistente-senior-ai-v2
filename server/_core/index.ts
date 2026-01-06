@@ -56,8 +56,10 @@ async function startServer() {
     next();
   });
 
-  app.use(express.json({ limit: "50mb" }));
-  app.use(express.urlencoded({ limit: "50mb", extended: true }));
+  // Aumentamos el límite para permitir mensajes de voz en base64 (que pesan un 33% más que el binario)
+  // 16MB binario -> ~22MB base64. Ponemos 30MB para tener margen.
+  app.use(express.json({ limit: "30mb" }));
+  app.use(express.urlencoded({ limit: "30mb", extended: true }));
 
   registerOAuthRoutes(app);
 

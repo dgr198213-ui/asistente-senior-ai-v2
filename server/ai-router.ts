@@ -15,8 +15,26 @@ export const aiRouter = router({
     )
     .mutation(async ({ input }) => {
       try {
-        // 1. Convertir base64 a Buffer
+        // 1. Validar tamaño del base64 antes de procesar (aprox 20MB para permitir margen sobre los 16MB finales)
+        // El tamaño del base64 es ~1.33 veces el tamaño binario
+        if (input.audioBase64.length > 25 * 1024 * 1024) {
+          throw new TRPCError({
+            code: "PAYLOAD_TOO_LARGE",
+            message: "El archivo de audio es demasiado grande. Por favor, graba un mensaje más corto.",
+          });
+        }
+
+        // 2. Convertir base64 a Buffer
         const audioBuffer = Buffer.from(input.audioBase64, "base64");
+        
+        // Validar tamaño binario real (límite de 16MB para Whisper)
+        const sizeMB = audioBuffer.length / (1024 * 1024);
+        if (sizeMB > 16) {
+          throw new TRPCError({
+            code: "PAYLOAD_TOO_LARGE",
+            message: `El audio pesa ${sizeMB.toFixed(2)}MB. El límite es de 16MB.`,
+          });
+        }
         
         // 2. Subir a almacenamiento temporal para obtener una URL (requerido por transcribeAudio)
         const fileName = `voice_${Date.now()}.${input.mimeType.split("/")[1] || "m4a"}`;
