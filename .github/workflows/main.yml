@@ -19,8 +19,7 @@ jobs:
 
     - name: Install pnpm
       uses: pnpm/action-setup@v4
-      with:
-        version: 9
+      # Eliminamos la versión manual para evitar conflictos con package.json
 
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
@@ -39,4 +38,3 @@ jobs:
 
     - name: Run tests
       run: pnpm test
-
