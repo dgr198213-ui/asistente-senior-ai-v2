@@ -1,18 +1,35 @@
 import { vi } from "vitest";
 
 // Mock AsyncStorage
+const storage: Record<string, string> = {};
 const mockAsyncStorage = {
-  getItem: vi.fn(() => Promise.resolve(null)),
-  setItem: vi.fn(() => Promise.resolve()),
-  removeItem: vi.fn(() => Promise.resolve()),
-  clear: vi.fn(() => Promise.resolve()),
-  getAllKeys: vi.fn(() => Promise.resolve([])),
-  multiGet: vi.fn(() => Promise.resolve([])),
-  multiSet: vi.fn(() => Promise.resolve()),
-  multiRemove: vi.fn(() => Promise.resolve()),
+  getItem: vi.fn((key: string) => Promise.resolve(storage[key] || null)),
+  setItem: vi.fn((key: string, value: string) => {
+    storage[key] = value;
+    return Promise.resolve();
+  }),
+  removeItem: vi.fn((key: string) => {
+    delete storage[key];
+    return Promise.resolve();
+  }),
+  clear: vi.fn(() => {
+    Object.keys(storage).forEach((key) => delete storage[key]);
+    return Promise.resolve();
+  }),
+  getAllKeys: vi.fn(() => Promise.resolve(Object.keys(storage))),
+  multiGet: vi.fn((keys: string[]) => Promise.resolve(keys.map((key) => [key, storage[key] || null]))),
+  multiSet: vi.fn((pairs: [string, string][]) => {
+    pairs.forEach(([key, value]) => (storage[key] = value));
+    return Promise.resolve();
+  }),
+  multiRemove: vi.fn((keys: string[]) => {
+    keys.forEach((key) => delete storage[key]);
+    return Promise.resolve();
+  }),
 };
 
 vi.mock("@react-native-async-storage/async-storage", () => ({
+  __esModule: true,
   default: mockAsyncStorage,
 }));
 
